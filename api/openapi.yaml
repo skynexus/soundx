@@ -1,0 +1,250 @@
+openapi: 3.0.3
+info:
+  title: Sound recommender
+  description: "**The purpose of this work sample is for you to show case your strengths as a developer, focus on the topics you think are most important or fun (i.e. testing, databases, api design, security etc). Chose the language/framework you are most comfortable with.**\n\nIn this work sample we want you to create an API to manage a sound library and the end-goal is to be able to recommend sounds based on some input.\n\nTo accomplish this we need to:\n\n- Create sounds\n- List sounds\n- Create collection of sounds (aka playlists)\n- Get recommendation of sounds based on input (i.e. a playlist)\n    - If you run out of time it's ok if this end-point returns a random sound, preferrably not the same every time\n\nThe API in this collection includes these four endpoints, feel free to modify or add more, keep in mind that we will run the tests included in this Postman collection to verify your work:\n\n- POST `/admin/sounds`\n- GET `/sounds`\n- POST `/playlists`\n- GET `/sounds/recommended`\n    \n\nWe would also like to see you include **one more end-point of your choice** that you think would be relevant for this system.\n\nYour solution should fulfill the functional requirements, we do not expect your work sample to be a production ready product.\n\nKeep in mind that we aim to run your code and use this Postman collection to test it. We might need some instructions to get everything up and running \U0001F609\n\n## **How to use this postman collection**\n\n**Step 1:** Check out the requests' documentation to learn more about -\n\n- what each request is meant to do.\n- the tests we've added against each one.\n    \n\n**Step 2:** Run this collection by clicking on \"Run\" or the by using the [Collection Runner](https://learning.postman.com/docs/collections/running-collections/intro-to-collection-runs/).\n\n<img src=\"https://content.pstmn.io/84019b0f-69c8-4c5f-98b9-2c90a6f9a0b1/Y29sbGVjdGlvbi1ydW5uZXItYnV0dG9uLmpwZWc=\" width=\"266\" height=\"103\">\n\n**Step 3:** To customize, replace the request URLs with your API endpoints and add or edit the tests if needed."
+  version: 1.0.0
+  contact: {}
+servers:
+  - url: http://localhost:8080
+paths:
+  /admin/sounds:
+    post:
+      summary: Create sounds
+      description: Creates sound(s), see example payload and tests for more information.
+      operationId: createSounds
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewSoundRequest'
+            examples:
+              Create sounds:
+                value:
+                  data:
+                    - bpm: 120
+                      credits:
+                        - name: King Sis
+                          role: VOCALIST
+                        - name: Ooyy
+                          role: PRODUCER
+                      duration_in_seconds: 120
+                      genres:
+                        - pop
+                      title: New song
+      responses:
+        "201":
+          description: ""
+  /sounds:
+    get:
+      summary: Get sounds
+      description: Fetches a list of sounds.
+      operationId: getSounds
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SoundResponse'
+  /sounds/{id}:
+    get:
+      summary: Get sound
+      description: Fetches a specific sound.
+      operationId: getSound
+      parameters:
+        - name: id
+          in: path
+          description: Id of sound to fetch
+          required: true
+          schema:
+            type: string
+            format: int64
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SoundResponse'
+  /playlists:
+    post:
+      summary: Create playlists
+      description: Creates a new collection of sounds.
+      operationId: createPlaylists
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewPlaylistRequest'
+            examples:
+              Create playlists:
+                value:
+                  data:
+                    - sounds:
+                        - '{{soundId}}'
+                      title: New playlist
+      responses:
+        "201":
+          description: ""
+    get:
+      summary: Get playlists
+      description: Fetches a list of playlists.
+      operationId: getPlaylists
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaylistResponse'
+  /sounds/recommended:
+    get:
+      summary: Get recommended sounds
+      description: Fetches a list of recommended songs. If you run out of time it's ok to return a random sound here, preferably not the same every time.
+      operationId: getRecommendedSounds
+      parameters:
+        - name: playlistId
+          in: query
+          schema:
+            type: string
+            example: '{{playlistId}}'
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SoundResponse'
+tags: []
+components:
+  schemas:
+    NewSoundRequest:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/NewSound'
+    SoundResponse:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Sound'
+    Sound:
+      allOf:
+        - $ref: '#/components/schemas/NewSound'
+        - type: object
+          required:
+          - id
+          - created_at
+          - updated_at
+          properties:
+            id:
+              type: string
+              format: int64
+            created_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
+    Credit:
+      type: object
+      required:
+        - name
+        - role
+      properties:
+        name:
+          type: string
+          example: King Sis
+        role:
+          type: string
+          example: VOCALIST
+    NewSound:
+      type: object
+      required:
+        - title
+        - bpm
+        - credits
+        - duration_in_seconds
+        - genres
+      properties:
+        bpm:
+          type: integer
+          format: int32
+          example: 120
+        credits:
+          type: array
+          items:
+            $ref: '#/components/schemas/Credit'
+          example:
+            - name: King Sis
+              role: VOCALIST
+            - name: Ooyy
+              role: PRODUCER
+        duration_in_seconds:
+          type: integer
+          format: int32
+          example: 120
+        genres:
+          type: array
+          items:
+            type: string
+            example: pop
+          example:
+            - pop
+        title:
+          type: string
+          example: New song
+    NewPlaylistRequest:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/NewPlaylist'
+    PlaylistResponse:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Playlist'
+    Playlist:
+      allOf:
+        - $ref: '#/components/schemas/NewPlaylist'
+        - type: object
+          required:
+          - id
+          properties:
+            id:
+              type: string
+              format: int64
+    NewPlaylist:
+      type: object
+      required:
+        - title
+        - sounds
+      properties:
+        title:
+          type: string
+          example: New playlist
+        sounds:
+          type: array
+          items:
+            type: string
+            format: int64
+            example: '{{soundId}}'
+          example:
+            - '{{soundId}}'

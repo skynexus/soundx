@@ -1,0 +1,6 @@
+BEGIN;
+
+DROP TABLE playlists;
+DROP TABLE sounds;
+
+COMMIT;
