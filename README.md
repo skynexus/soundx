@@ -197,7 +197,7 @@ Note that this will automatically install the
 To run migrations, run:
 
 ```sh
-make migration
+make migrate
 ```
 
 Note that the SoundX service automatically runs all database migrations
